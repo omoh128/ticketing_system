@@ -1,8 +1,7 @@
 <?php
-
 require_once 'templates/header.php';
-// Load required classes
 
+// Load required classes
 require_once 'classes/User.php';
 require_once 'classes/Ticket.php';
 require_once 'classes/TicketingSystem.php';
@@ -12,6 +11,7 @@ session_start();
 
 // Initialize the ticketing system
 $ticketingSystem = new TicketingSystem();
+
 // Load ticket data from tickets.json
 $ticketsData = file_get_contents('data/tickets.json');
 $tickets = json_decode($ticketsData, true);
@@ -19,24 +19,32 @@ $tickets = json_decode($ticketsData, true);
 $usersData = file_get_contents('data/users.json');
 $users = json_decode($usersData, true);
 
-// Check for form submissions and handle actions
+
 // Check for form submissions and handle actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Add ticket
     if (isset($_POST['submit_ticket'])) {
         $subject = $_POST['subject'];
         $description = $_POST['description'];
-        $userName = isset($_POST['user_name']) ? $_POST['user_name'] : null;
-        $userEmail = isset($_POST['user_email']) ? $_POST['user_email'] : null;
+        $userEmail = $_POST['user_email'];
 
-        // Check if user_name and user_email are set before creating the User object
-        if (!empty($userName) && !empty($userEmail)) {
-            $user = new User($userName, $userEmail);
-            $ticket = $ticketingSystem->createTicket(time(), $subject, $description, $user);
+        // Find the user in the $users array by email
+        $user = null;
+        foreach ($users as $userData) {
+            if ($userData['email'] === $userEmail) {
+                $user = new User($userData['name'], $userData['email']);
+                break;
+            }
+        }
+
+        if ($user === null) {
+            // User not found, handle accordingly (e.g., display an error message)
+            echo '<script>alert("User not found. Please provide a valid email address.");</script>';
+        } else {
+            $newTicket = $ticketingSystem->createTicket(time(), $subject, $description, $user);
             // You may save the ticket data to the database here (if implemented)
             // Redirect to ticket list page or display a success message
-        } else {
-            // Handle the case when user_name or user_email is missing (e.g., display an error message)
+            echo '<script>alert("Ticket created successfully.");</script>';
         }
     }
 
@@ -45,11 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Handle ticket status update (similar to previous examples)
     }
 }
-
-
 ?>
 
-<!-- Rest of your HTML and PHP code for the index.php page -->
 <!-- Create Ticket Form -->
 <h2>Create a New Ticket</h2>
 <form action="index.php" method="post">
@@ -66,31 +71,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <textarea id="description" name="description" required></textarea>
     <br>
     <input type="submit" name="submit_ticket" value="Submit Ticket">
+
 </form>
 
-<!-- List of Tickets -->
-<h2>Open Tickets</h2>
-<ul>
-<?php
-// Loop through the tickets array and display them
-foreach ($tickets as $ticket) {
-    // Display ticket details (subject, user, status)
-    echo '<li>';
-    echo '<strong>Subject:</strong> ' . $ticket['subject'] . '<br>';
-
-    // Check if user information (name and email) exists before displaying
-    if (isset($ticket['user']) && isset($ticket['user']['name']) && isset($ticket['user']['email'])) {
-        echo '<strong>User:</strong> ' . $ticket['user']['name'] . ' (' . $ticket['user']['email'] . ')<br>';
-    } else {
-        echo '<strong>User:</strong> Not available<br>';
-    }
-
-    echo '<strong>Status:</strong> ' . $ticket['status'] . '<br>';
-    echo '</li>';
-}
-?>
-
-</ul>
+<!-- Display the newly created ticket -->
+<?php if (isset($newTicket)): ?>
+    <h2>Newly Created Ticket</h2>
+    <ul>
+        <li>
+            <strong>Subject:</strong> <?php echo $newTicket->getSubject(); ?><br>
+            <strong>User:</strong> <?php echo $newTicket->getUser()->getName() . ' (' . $newTicket->getUser()->getEmail() . ')'; ?><br>
+            <strong>Status:</strong> <?php echo $newTicket->getStatus(); ?><br>
+        </li>
+    </ul>
+<?php endif; ?>
 
 <?php
 // Include the footer.php file
