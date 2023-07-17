@@ -72,16 +72,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <h2>Open Tickets</h2>
 <ul>
 <?php
-    // Loop through the tickets array and display them
-    foreach ($tickets as $ticket) {
-        // Display ticket details (subject, user, status)
-        echo '<li>';
-        echo '<strong>Subject:</strong> ' . $ticket['subject'] . '<br>';
-        echo '<strong>User:</strong> ' . $ticket['user_name'] . ' (' . $ticket['user_email'] . ')<br>';
-        echo '<strong>Status:</strong> ' . $ticket['status'] . '<br>';
-        echo '</li>';
+// Loop through the tickets array and display them
+foreach ($tickets as $ticket) {
+    // Display ticket details (subject, user, status)
+    echo '<li>';
+    echo '<strong>Subject:</strong> ' . $ticket['subject'] . '<br>';
+
+    // Check if user information (name and email) exists before displaying
+    if (isset($ticket['user']) && isset($ticket['user']['name']) && isset($ticket['user']['email'])) {
+        echo '<strong>User:</strong> ' . $ticket['user']['name'] . ' (' . $ticket['user']['email'] . ')<br>';
+    } else {
+        echo '<strong>User:</strong> Not available<br>';
     }
-    ?>
+
+    echo '<strong>Status:</strong> ' . $ticket['status'] . '<br>';
+    echo '</li>';
+}
+?>
+
 </ul>
 
 <?php
