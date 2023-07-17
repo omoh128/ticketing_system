@@ -1,0 +1,36 @@
+[
+    {
+      "id": 1,
+      "subject": "Website Issue",
+      "description": "I am having trouble accessing the website.",
+      "status": "Open",
+      "user": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com"
+      }
+    },
+    {
+      "id": 2,
+      "subject": "Payment Problem",
+      "description": "My payment is not going through.",
+      "status": "Open",
+      "user": {
+        "id": 2,
+        "name": "Jane Smith",
+        "email": "jane@example.com"
+      }
+    },
+    {
+      "id": 3,
+      "subject": "Account Access",
+      "description": "I forgot my account password.",
+      "status": "Resolved",
+      "user": {
+        "id": 1,
+        "name": "John Doe",
+        "email": "john@example.com"
+      }
+    }
+  ]
+  
